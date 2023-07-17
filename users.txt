@@ -1,5 +1,0 @@
-Mickael Halimi,123 Main Street New York USA,mickaelhalimi@gmail.com,123
-Almog Ben Yamin,123 Main Street New York USA,almoggx@gmail.com,123
-Shoam Ben Shoushan,456 Elm Avenue Los Angeles USA,shoam@gmail.com,232
-Mor Berebi,789 Oak Drive London W1K 5DG United Kingdom,mor@fmail.com,923
-John Kasr,10 Maple Street Toronto ON M5H 2N2 Canada,john@fmail.com,956
