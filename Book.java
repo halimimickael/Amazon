@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 class Book {
     private String title;
     private String author;
@@ -30,6 +32,13 @@ class Book {
         return isbn;
     }
 
+    public static boolean isBookFound(String isbn){
+        ArrayList<Book> books = FileHandler.readBooksFromFile();
+        for (int i = 0; i < books.size(); i++) {
+            if (books.get(i).getIsbn().equals(isbn)) return true;
+        }
+        return false;
+    }
 }
 
 

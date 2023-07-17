@@ -19,7 +19,7 @@ public class MenuManager {
     }
 
     public static void Menu() {
-        int option = 1; // think why initialized with "1"
+        int option = 1;
         System.out.println( "\n|---Welcome to Amazon!---|\n");
         String[] options = {"I - Search for a book",
                             "II - View user details",
@@ -34,14 +34,13 @@ public class MenuManager {
                 option = scanner.nextInt();
                 switch (option) {
                     case 1:
-                        // Add new submenu
                         search();
                         break;
                     case 2:
-                        userDetails(); // rename all optionX functions to meaningful names
+                        userDetails();
                         break;
                     case 3:
-                        addBookToUserPurchase(); // rename all optionX functions to meaningful names
+                        addBookToUserPurchase();
                         break;
                     case 4:
                         logOut();
@@ -57,73 +56,67 @@ public class MenuManager {
         }
     }
 
+
+//When the user wants to log out the program launches a choice to log in again or register
     private static void logOut() {
-        System.out.println("Thank you " + LoginManager.name + " for your visit to Amazon");
+        System.out.println("Thank you " +orange+ LoginManager.name + stopColor+" for your visit to Amazon");
         System.out.println();
         System.out.println("--------------------------------------------------------------");
         System.out.println();
         LoginManager.MenuLogin();
     }
-    public static void addBookToUserPurchase() {
+
+
+    /*
+     * Adds a book to the user's shopping list based on the ISBN provided.
+     * If the ISBN is found in Amazon's database, the book is added and a success message is displayed.
+     * Otherwise, the user is informed that the book with the ISBN provided is not available.
+     * The method handles cases where the user's email already exists or is new in the shopping list.
+     * Updated file content is handled with a StringBuilder.
+     * Exceptions are handled if there is an error reading or writing to the file.
+     */
+    public static void addBookToUserPurchase() throws IOException {
         System.out.println("Enter your ISBN:");
         String isbn = scanner.next();
-        boolean isbnFound = false; // Flag to track whether the ISBN is found
-        String nameBook = "";
+        String email = LoginManager.user;
+        boolean isbnFound = Book.isBookFound(isbn);
+        if (isbnFound) {
+            System.out.println("A book with ISBN " +cyan+ isbn +stopColor+ " was added to the user " + cyan +LoginManager.name +stopColor+ " in the purchase list.");
+        } else {
+            System.out.println("A book with ISBN " +cyan + isbn + stopColor+ " not in the Amazon Store.");
+        }
 
-        try {
-            // Étape 1 : Lire le contenu existant du fichier
-            ArrayList<String> lines = new ArrayList<>();
-            BufferedReader reader = new BufferedReader(new FileReader(Main.PURCHASE_PATH));
+        String temp = email + "," + isbn;
+        StringBuilder updatedFileContent = new StringBuilder();
+        boolean emailFound = false;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(Main.PURCHASE_PATH))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                lines.add(line);
-            }
-            reader.close();
-            ArrayList<Book> books = FileHandler.readBooksFromFile();
-
-            // Étape 2 : Rechercher la ligne correspondant à l'utilisateur
-            for (int i = 0; i < lines.size(); i++) {
-                String currentLine = lines.get(i);
-                String[] data = currentLine.split(",");
-                for (int j = 0; j < books.size(); j++) {
-                    if (data.length >= 1 && data[0].equals(LoginManager.user) && books.get(j).getIsbn().equals(isbn)) {
-                        nameBook = books.get(j).getTitle();
-                        // Ajouter le code ISBN à la ligne
-                        currentLine += "," + isbn;
-                        lines.set(i, currentLine);
-                        isbnFound = true; // ISBN found in the Amazon Store
-                        break;
-                    }
-                    if (!data[0].equals(LoginManager.user) && books.get(j).getIsbn().equals(isbn)) {
-                        nameBook = books.get(j).getTitle();
-                        currentLine += "\n" + LoginManager.user + "," + isbn;
-                        lines.set(i, currentLine);
-                        isbnFound = true; // ISBN found in the Amazon Store
-                        break;
-                    }
+                String[] data = line.split(",");
+                if (data[0].equals(email)) {
+                    line += "," + isbn; // Append the new ISBN to the existing line
+                    emailFound = true;
                 }
+                updatedFileContent.append(line).append(System.lineSeparator());
             }
-
-            // Étape 3 : Écrire le contenu modifié dans le fichier
-            BufferedWriter writer = new BufferedWriter(new FileWriter(Main.PURCHASE_PATH));
-            for (String updatedLine : lines) {
-                writer.write(updatedLine);
-                writer.newLine();
-            }
-            writer.close();
-
-            if (isbnFound) {
-                System.out.println("A book "+cyan+ nameBook +stopColor + " with ISBN " +cyan+ isbn +stopColor+ " was added to the user " + LoginManager.name + " in the purchase list");
-            } else {
-                System.out.println("A book with ISBN " + isbn + " not in the Amazon Store.");
-            }
-
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
+        if (!emailFound) {
+            updatedFileContent.append(temp).append(System.lineSeparator());
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(Main.PURCHASE_PATH))) {
+            writer.write(updatedFileContent.toString());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    // Options
+
+    // retrieve the name of the book the user wants to find. if the book is in the store then the program prints the information
     private static void searchBook() throws IOException {
         scanner = new Scanner(System.in);
         System.out.print(orange + "Enter book name: " + stopColor);
@@ -142,6 +135,8 @@ public class MenuManager {
     }
 
 
+/*a method searchISBN searches against an isbn that the user gave it based on the books.txt file.
+in case he finds an isbn compatible with what he has entered then the program prints the information of the book */
     private static void searchISBN() throws IOException {
         System.out.print(orange + "Enter ISBN: " + stopColor);
         String isbn = scanner.next();
@@ -176,8 +171,9 @@ public class MenuManager {
     }
 
 
+// user details
     private static void userDetails() {
-        ArrayList<User> users = FileHandler.readUsersFromFile(Main.USER_PATH);
+        ArrayList<User> users = FileHandler.readUsersFromFile();
         String username = LoginManager.user;
         for (int i = 0; i < users.size(); i++) {
             if (users.get(i).getEmail().equals(username)) {
@@ -188,9 +184,10 @@ public class MenuManager {
         }
     }
 
-    public static void booksPurchase() {
 
-        ArrayList<Book> purchasedBooks = FileHandler.getBooksPurchasedByUser(Main.PURCHASE_PATH);
+//this method retrieves all the isbn codes that the user has purchased according to the purchase.txt file
+    public static void booksPurchase() {
+        ArrayList<Book> purchasedBooks = FileHandler.getBooksPurchasedByUser();
         for (int i = 0; i < purchasedBooks.size(); i++) {
             Book book = purchasedBooks.get(i);
             System.out.println(book.getTitle());
@@ -203,6 +200,7 @@ public class MenuManager {
     }
 
 
+//prints the "search" menu and sends us to the methods according to the user's choice
     public static void search() throws IOException {
 
         int subOption;
@@ -234,12 +232,16 @@ public class MenuManager {
             }
         } while (subOption < 1 || subOption > 3);
     }
+
+
+    //method that prints all the books
     private static void allBooks() {
         ArrayList<Book> allBooks = FileHandler.readBooksFromFile();
         for(int i = 0; i < allBooks.size(); i++) {
             System.out.println(cyan + "TITLE: " + stopColor + allBooks.get(i).getTitle() + cyan + " AUTHOR:" + stopColor + allBooks.get(i).getAuthor() + cyan + " Price: " + stopColor + allBooks.get(i).getPrice() + cyan + " ISBN: " + stopColor + allBooks.get(i).getIsbn());
         }
     }
+
 }
 
 

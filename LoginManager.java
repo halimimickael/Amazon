@@ -24,7 +24,7 @@ public class LoginManager {
         String red = "\u001B[31m";
         String reset = "\u001B[0m";
 
-        ArrayList<User> users = FileHandler.readUsersFromFile(Main.USER_PATH);
+        ArrayList<User> users = FileHandler.readUsersFromFile();
 
         User authenticatedUser = null;
 
@@ -86,7 +86,7 @@ public class LoginManager {
             System.out.print("Enter your Password: ");
             password = scanner.nextLine();
 
-            ArrayList<User> users = FileHandler.readUsersFromFile(Main.USER_PATH);
+            ArrayList<User> users = FileHandler.readUsersFromFile();
             int count = 0;
             for (User user : users) {
                 if (user.getEmail().equals(mail)) {
